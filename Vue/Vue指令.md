@@ -168,6 +168,132 @@ v-if后面的值既可以从数据中获取，也可以直接在后面使用表�
 </div>
 ```
 
+## 5.`v-bind`指令
+
+主要用于动态绑定class、style、值；
+
+1. 可以绑定的东西：class、style样式（一般是内联样式）、自定义属性
+2. 绑定支持的格式：对象形式和数组形式都可以
+
+```html
+<div id="app">
+  <!-- 此时class aaaa和bbbb会被添加到该元素上  -->
+  <p :class="['aaaa','bbbb']">王宝鸡</p>
+  <!-- 也可以将数组值写到methods中 -->
+  <p :class="getClasses()">王宝狗</p>
+  <!-- 也可以定义一个方法 -->
+  <p :class="myClass">王宝狗</p>
+  <!-- 也可以使用三元表达式 -->
+  <p :class="['aaaa',flag ? 'bbbb' : '' ]">王宝狗</p>
+</div>
+
+<script src="../vue.js"></script>
+<script>
+  let test = new Vue({
+    el : "#app",
+    data: {
+      flag: true
+    },
+    methods : {
+      getClasses : function(){
+        return ['a','b']
+      },
+      myClass: {
+        a: true,
+        b: false
+      }
+    }
+  })
+</script>
+/*   style绑定形式与上面的相同*/
+```
+
++ 同样的，动态绑定也可以用在组件上：
+
+```vue
+<myCpn :class="{test: isTrue}"></myCpn>
+```
+
+自动添加前缀：当 `v-bind:style` 使用需要添加[浏览器引擎前缀](https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix)的 CSS property 时，如 `transform`，Vue.js 会自动侦测并添加相应的前缀。
+
+## 6.事件监听
+
+`v-on`：用于监听事件
+
+1. 主要作用：监听一些DOM事件，并在触发时执行相应地JavaScript语句；
+2. 事件方法的定义：事件对应的操作定义在vue实例的methods属性中；
+3. 语法糖形式：@click；
+
+```html
+<div class="app" @click="divClick">
+    /*使用v-on或者语法糖形式都可以，建议使用语法糖形式*/
+</div>
+
+  <script src="../vue.js"></script>
+
+  <script>
+    const test = new Vue({
+      el: '.app',
+      methods: {
+        divClick(){
+          console.log('testDemo')
+        }
+      }
+    })
+  </script>
+```
+
+### 关于参数的注意事项
+
+事件处理函数一般存在以下三种情况：
+
++ 不需要传递参数
++ 需要传递一个参数：
+    + 传递相应地参数；
+    + 未传递参数，此时会默认将event事件对象作为参数传入回调函数中；
++ 需要传递多个参数：
+    + 不需要event事件对象作为参数
+    + 需要event事件对象作为参数：在event对应的参数位置使用“$event”的形式传入事件对象；
+
+```html
+<div @click='test(a,b,$event)'></div>
+```
+
+### v-on指令的修饰符
+
++ 指定形式：`@click.修饰符 = "fn"`，回调函数可以写圆括号也可以不写圆括号；
++ 事件修饰符：
+    + .stop：阻止事件冒泡；
+    + .prevent：阻止默认行为；
+    + .once：只触发一次回调；
+    + .capture：监听事件时将默认的事件冒泡改为事件捕获（即内部元素触发的事件先在此处理，然后才交由内部元素进行处理）；
+    + .self：只有当触发事件的元素等于event.target时才会调用事件处理函数；
+    + .passive：以 `{ passive: true }` 模式添加侦听器；
+    + .native：监听组件根元素的原生事件；
++ v-on指令的修饰符可以链式书写；
++ 按键修饰符（用于确定是由哪个按键触发的事件）：
+    + 鼠标按钮：middle、left、right
+    + 键盘按钮
++ .{keyCode | keyAlias}：定义特定按钮按下时触发事件：
+
+```vue
+Vue.config.keyCodes.f2 = 113
+
+
+// 然后就可以再对应的元素上使用
+<button @click.f2="test"></button>
+```
+
+
+
+
+
+
+
+
+
+
+
 # 二、Vue自定义指令
 
 ## 1.自定义全局指令
