@@ -168,6 +168,8 @@ v-if后面的值既可以从数据中获取，也可以直接在后面使用表�
 </div>
 ```
 
+------
+
 ## 5.`v-bind`指令
 
 主要用于动态绑定class、style、值；
@@ -215,6 +217,8 @@ v-if后面的值既可以从数据中获取，也可以直接在后面使用表�
 ```
 
 自动添加前缀：当 `v-bind:style` 使用需要添加[浏览器引擎前缀](https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix)的 CSS property 时，如 `transform`，Vue.js 会自动侦测并添加相应的前缀。
+
+------
 
 ## 6.事件监听
 
@@ -284,16 +288,6 @@ Vue.config.keyCodes.f2 = 113
 <button @click.f2="test"></button>
 ```
 
-
-
-
-
-
-
-
-
-
-
 # 二、Vue自定义指令
 
 ## 1.自定义全局指令
@@ -317,7 +311,24 @@ Vue.directive('name',{
 
 ## 2.局部自定义指令
 
+局部组件可以通过如下形式注册，局部指令仅在当前的组件内可用：
 
+```javascript
+new Vue({
+  el: '#app',
+  // 使用directives属性定义局部自定义指令
+  directives: {
+    // 指令名： {钩子函数： 处理函数}
+    focus: {
+      inserted: function(el){
+        el.focus()
+      }
+    }
+  }
+})
+```
+
+上面的形式定义的自定义指令可以在当前组件的任何元素上使用；
 
 ## 3.钩子函数
 
@@ -330,4 +341,98 @@ Vue.directive('name',{
 5. `unbind`：只调用一次，指令与组件解绑时调用；
 
 ## 4.钩子函数参数
+
+指令的钩子函数会被传入以下的参数：
+
++ `el`：指令所绑定的元素，可以用于操作绑定指令的DOM元素；
++ `binding`：一个对象，该对象内部包含以下property：
+    + `name`：指令名，不包括“v-”前缀；
+    + `value`：指令的绑定值，例如“v-test='1+1'”的绑定值为2；
+    + `oldValue`：指令所绑定的上一个值，只有在`update`和`componentUpdated`中可用（无论值是否改变）；
+    + `expression`：字符串形式的指令表达式，如“v-test='1+1'”表达式为“1+1”；
+    + `arg`：通过动态指令的形式传给指令的参数，可选；
++ `vnode`：vue编译生成的虚拟节点；
++ `oldVnode`：上一个虚拟节点，与oldValue一样，仅在`update`和`componentUpdated`钩子函数中可用；
+
+使用的形式一般如下所示：
+
+```js
+// 全局指令为例
+Vue.directive('test',{
+  // 不一定所有参数都要传递给钩子函数，可选的
+  bind: function(el,binding,vnode,oldVnode){
+    // bind是一个对象参数，对应有子属性
+    binding.name
+    binding.value
+    // ....
+  }
+})
+```
+
+### 动态指令参数
+
+指令的参数是可以动态传递的，形式主要如下所示：
+
+`v-test:[argument] = 'value'`（注意中括号前的冒号不能少），`argument` 参数可以根据组件实例数据进行更新；
+
+```html
+<div id="app">
+  <p v-bg:[color]="327">Test Demo</p>
+</div>
+
+
+<script src="../../vue.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    // 注册局部自定义指令
+    directives: {
+      // 指令名
+      bg: function(el,binding){
+        const currentColor = (binding.arg == 'red' ? 'red' : '')
+        el.style.color = currentColor
+      }
+    },
+    data(){
+      return {
+        // color: 'pink', 根据指令的钩子函数内部程序，只有color属性值为red时color属性才有效
+        color: 'red',
+      }
+    }
+  })
+</script>
+```
+
+### 使用对象字面量传递多个参数
+
+注意：在给自定义指令传递多个参数时，此时binding的value属性对应的值是一个对象：
+
+```html
+<div id="app">
+  <p v-multiple="{test1:v1,test2:v2}">Test Demo</p>
+</div>
+
+<script src="../../vue.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    directives: {
+      multiple: function(el,binding){
+        console.log(binding.value.test1) //文本1
+        console.log(binding.value.test2); // 文本2
+        console.log(binding.value) // {test1: "文本1", test2: "文本2"}
+        /* 简单理解可以理解为：指令后面的对象会被完全赋值给binding参数的value属性 */
+      }
+    },
+    data: {
+      v1: '文本1',
+      v2: '文本2',
+    }
+  })
+</script>
+```
+
+
+
+
 
